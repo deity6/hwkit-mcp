@@ -144,10 +144,25 @@ pip install -e .
         env:
           PYTHONUTF8: '1'
           PYTHONIOENCODING: 'utf-8'
+          # 宿主会清洗子进程环境变量；显式给源码路径，避免 import 不到
+          PYTHONPATH: 'D:\path\to\hwkit-mcp\src'
+          # DashCraft 通常不在 PATH 上
+          HWKIT_DASHCRAFT: 'D:\path\to\dashcraft.exe'
+          # pbix-mcp 的 stdio 启动垫片（内容只有两行，见下）
+          HWKIT_PBIX_LAUNCHER: 'D:\path\to\pbix_launch.py'
         toolCallTimeoutMs: 600000
 ```
 
+`pbix_launch.py` 的内容：
+
+```python
+from pbix_mcp.server import mcp
+
+mcp.run("stdio")
+```
+
 > `PYTHONUTF8=1` 在 Windows 上是必须的：子进程 stdio 默认按系统代码页（GBK）编码，中文会乱码。
+> `PYTHONPATH` 也要显式给：有的宿主会把 `APPDATA` 一并清掉，那样 user-site 里的包就 import 不到了。
 
 改完 patch 文件即热重组，工具以 `mcp__hwkit__*` 出现。
 
